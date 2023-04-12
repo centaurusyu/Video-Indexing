@@ -10,6 +10,14 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+# Video file, mp4, audio
+*.rgb
+*.wav
+*.mp4
+
+# PDF file
+*.pdf
+
 # Package Files #
 *.jar
 *.war
