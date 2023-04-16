@@ -43,7 +43,7 @@ public class SceneNode {
 
    // Returns the shot index for a given frame.
    // The shots are 0 indexed. e.g. Returned value is 0 means Shot 1, etc.
-   // @param: "frame" is a valid integer >= 0 && <= max frames in the video.
+   // @param: "frame" is a valid integer >= 0 && < max frames in the video.
    public int getShotIndex(int frame) {
       // In case the list is null, or zero shot in the list, return -1.
       if (shots == null || shots.size() == 0) {
@@ -54,6 +54,7 @@ public class SceneNode {
          if (shots.get(idx).getStartFrame() <= frame && frame <= shots.get(idx).getEndFrame()) {
             return idx;
          }
+
       }
       // Not finding the result in the shot indices.
       return -1;

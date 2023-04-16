@@ -12,8 +12,8 @@ public class VideoIndex {
    }
 
    // Add a scene into the index.
-   // @param: "startFrame" is an integer >= 0 && <= max frames in the video.
-   // @param: "endFrame" is an integer >= 0 && <= max frames in the video.
+   // @param: "startFrame" is an integer >= 0 && < max frames in the video.
+   // @param: "endFrame" is an integer >= 0 && < max frames in the video.
    public void addScene(int startFrame, int endFrame) {
       scenes.add(new SceneNode(startFrame, endFrame));
    }
@@ -31,7 +31,7 @@ public class VideoIndex {
 
    // Returns the scene index for a given frame.
    // The scenes are 0 indexed. e.g. Returned value is 0 means Scene 1, etc.
-   // @param: "frame" is a valid integer >= 0 && <= max frames in the video.
+   // @param: "frame" is a valid integer >= 0 && < max frames in the video.
    public int getSceneIndex(int frame) {
       // In case the list is null, or zero scene in the list, return -1.
       if (scenes == null || scenes.size() == 0) {

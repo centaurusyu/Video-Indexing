@@ -43,7 +43,7 @@ public class ShotNode {
 
    // Returns the subshot index for a given frame.
    // The subshots are 0 indexed. e.g. Returned value is 0 means Subshot 1, etc.
-   // @param: "frame" is a valid integer >= 0 && <= max frames in the video.
+   // @param: "frame" is a valid integer >= 0 && < max frames in the video.
    public int getSubshotIndex(int frame) {
       // In case the list is null, or zero subshot in the list, return -1.
       if (subshots == null || subshots.size() == 0) {
