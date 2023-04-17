@@ -54,7 +54,6 @@ public class SceneNode {
          if (shots.get(idx).getStartFrame() <= frame && frame <= shots.get(idx).getEndFrame()) {
             return idx;
          }
-
       }
       // Not finding the result in the shot indices.
       return -1;
