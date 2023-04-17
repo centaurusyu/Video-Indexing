@@ -12,7 +12,7 @@ public class VideoPlayer {
     private static final int HEIGHT = 270;
     private static final int FPS = 30;
 
-    private static int currFrame = 7800; // 0-indexed, this is where the video starts
+    private static int currFrame = 8500; // 0-indexed, this is where the video starts
     private static int totalFrame = 0; // total frames in the video
     private static long audioClipCurrentTime = 0; // in microseconds
 
@@ -89,14 +89,14 @@ public class VideoPlayer {
         return (int) totalFramesLong;
     }
 
-    // Updates the video to show the given frame.
+    // Returns a BufferedImage for the given frame.
     // @param: "fm" is a frame that >= 0 && < max video frames
-    private static void renderFrame(int fm) throws IOException {
+    private static BufferedImage extractFrame(int fm) throws IOException {
+        BufferedImage image = new BufferedImage(WIDTH, HEIGHT,
+                BufferedImage.TYPE_INT_RGB);
         try {
             RandomAccessFile raf = new RandomAccessFile(videoFile, "r");
             FileChannel channel = raf.getChannel();
-            BufferedImage image = new BufferedImage(WIDTH, HEIGHT,
-                    BufferedImage.TYPE_INT_RGB);
             int frameSize = WIDTH * HEIGHT * 3;
             ByteBuffer buffer = ByteBuffer.allocate(frameSize);
             channel.read(buffer, (long) fm * frameSize);
@@ -111,13 +111,14 @@ public class VideoPlayer {
                     image.setRGB(x, y, rgb);
                 }
             }
-            videoLabel.setIcon(new ImageIcon(image));
+            // videoLabel.setIcon(extractFrame);
             buffer.clear();
             channel.close();
             raf.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return image;
     }
 
     // Builds the UI to show the video, the buttons, and indices.
@@ -132,7 +133,7 @@ public class VideoPlayer {
         // Create the video panel, and place it in the UI:
         videoLabel = new JLabel();
         videoLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        renderFrame(currFrame); // First frame
+        videoLabel.setIcon(new ImageIcon(extractFrame(currFrame))); // First frame
         c.anchor = GridBagConstraints.CENTER;
         c.gridx = 0;
         c.gridy = 0;
@@ -222,7 +223,7 @@ public class VideoPlayer {
     // Plays the video according to what was clicked previously.
     private static void playVideo() throws IOException {
         while (isPlaying && currFrame < totalFrame) {
-            renderFrame(currFrame);
+            videoLabel.setIcon(new ImageIcon(extractFrame(currFrame)));
             frame.validate();
             frame.repaint();
             currFrame++;
