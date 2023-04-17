@@ -12,9 +12,8 @@ public class VideoPlayer {
     private static final int HEIGHT = 270;
     private static final int FPS = 30;
 
-    private static int currFrame = 8500; // 0-indexed, this is where the video starts
+    private static int currFrame = 0; // 0-indexed, this is where the video starts
     private static int totalFrame = 0; // total frames in the video
-    private static long audioClipCurrentTime = 0; // in microseconds
 
     private static File videoFile = null; // video file
     private static Clip audioClip = null; // auido clip object
@@ -49,7 +48,6 @@ public class VideoPlayer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        audioClipCurrentTime = getClipStartTime(currFrame);
 
         // Build the videoIndex for the given video:
         videoIndex = new VideoIndex(); // indexing is stored in here
@@ -60,25 +58,29 @@ public class VideoPlayer {
         // Create UI:
         buildUI();
 
-        // Run the video:
+        // Run the video and audio:
         Thread videoThread = new Thread(() -> {
             while (true) {
-                try {
-                    playVideo();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                playVideo();
             }
         });
         videoThread.start();
 
-        // Run the audio:
-        Thread audioThread = new Thread(() -> {
-            while (true) {
-                playAudio();
+        // Set a timer to synchronize the audio for every frame:
+        Timer audioTimer = new Timer(1, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // if audio is faster than video, wait for a bit:
+                long correctAudioTime = getClipStartTime(currFrame >= totalFrame ? totalFrame - 1 : currFrame);
+                long actualAudioTime = audioClip.getMicrosecondPosition();
+                long diff = actualAudioTime - correctAudioTime;
+                long threshold = (long) 1000 / FPS;
+                if (diff > threshold) {
+                    audioClip.setMicrosecondPosition(correctAudioTime);
+                }
             }
         });
-        audioThread.start();
+        audioTimer.start();
     }
 
     // Returns the total frames in the video clip.
@@ -91,7 +93,7 @@ public class VideoPlayer {
 
     // Returns a BufferedImage for the given frame.
     // @param: "fm" is a frame that >= 0 && < max video frames
-    private static BufferedImage extractFrame(int fm) throws IOException {
+    private static BufferedImage getFrameImage(int fm) {
         BufferedImage image = new BufferedImage(WIDTH, HEIGHT,
                 BufferedImage.TYPE_INT_RGB);
         try {
@@ -122,7 +124,7 @@ public class VideoPlayer {
     }
 
     // Builds the UI to show the video, the buttons, and indices.
-    private static void buildUI() throws IOException {
+    private static void buildUI() {
         // Create the outlayer of the UI:
         frame = new JFrame("Video Player");
         frame.setSize(new Dimension(900, 500)); // this can be changed
@@ -133,7 +135,7 @@ public class VideoPlayer {
         // Create the video panel, and place it in the UI:
         videoLabel = new JLabel();
         videoLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        videoLabel.setIcon(new ImageIcon(extractFrame(currFrame))); // First frame
+        videoLabel.setIcon(new ImageIcon(getFrameImage(currFrame))); // First frame
         c.anchor = GridBagConstraints.CENTER;
         c.gridx = 0;
         c.gridy = 0;
@@ -175,15 +177,17 @@ public class VideoPlayer {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!isPlaying) {
+                    isPlaying = true;
                     if (stopClicked) {
                         update();
                     }
                     // check if the video is finished:
                     if (currFrame == totalFrame) {
                         currFrame = 0;
-                        audioClipCurrentTime = 0;
                     }
-                    isPlaying = true;
+                    // Play audio:
+                    audioClip.setMicrosecondPosition(getClipStartTime(currFrame));
+                    audioClip.start();
                 }
                 stopClicked = false;
             }
@@ -197,8 +201,8 @@ public class VideoPlayer {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (isPlaying) {
-                    isPlaying = false;
                     audioClip.stop();
+                    isPlaying = false;
                 }
                 stopClicked = false;
             }
@@ -212,8 +216,8 @@ public class VideoPlayer {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (isPlaying) {
-                    isPlaying = false;
                     audioClip.stop();
+                    isPlaying = false;
                 }
                 stopClicked = true;
             }
@@ -221,12 +225,12 @@ public class VideoPlayer {
     }
 
     // Plays the video according to what was clicked previously.
-    private static void playVideo() throws IOException {
+    private static void playVideo() {
+        // Video:
         while (isPlaying && currFrame < totalFrame) {
-            videoLabel.setIcon(new ImageIcon(extractFrame(currFrame)));
+            videoLabel.setIcon(new ImageIcon(getFrameImage(currFrame++)));
             frame.validate();
             frame.repaint();
-            currFrame++;
             // Reaches the end of the video:
             if (currFrame == totalFrame) {
                 isPlaying = false;
@@ -240,28 +244,7 @@ public class VideoPlayer {
         }
     }
 
-    // Plays the audio.
-    private static void playAudio() {
-        while (isPlaying) {
-            if (!audioClip.isRunning()) {
-                if (isPlaying) {
-                    audioClipCurrentTime = getClipStartTime(currFrame);
-                    audioClip.setMicrosecondPosition(audioClipCurrentTime);
-                    audioClip.start();
-                }
-            } else {
-                // If the audio is faster, wait a bit:
-                long audioTimestamp = audioClip.getMicrosecondPosition();
-                long videoTimestamp = getClipStartTime(currFrame);
-                long diff = audioTimestamp - videoTimestamp;
-                if (diff > 0) {
-                    audioClip.setMicrosecondPosition(videoTimestamp);
-                }
-            }
-        }
-    }
-
-    // Updates the frame to the beginning of the segment frame
+    // Updates the frame to the beginning of its segment
     // and the audio clip start time.
     private static void update() {
         int tempFrame = currFrame;
@@ -289,7 +272,6 @@ public class VideoPlayer {
             System.exit(1);
         }
         currFrame = tempFrame;
-        audioClipCurrentTime = getClipStartTime(currFrame);
     }
 
     // Returns the start time of the audio given the frame.
