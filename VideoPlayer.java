@@ -1,10 +1,14 @@
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
+import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.sound.sampled.*;
 
 public class VideoPlayer {
@@ -25,6 +29,9 @@ public class VideoPlayer {
 
     private static boolean isPlaying = false; // not playing at the beginning
     private static boolean stopClicked = false; // check if stop is clicked
+
+    private static ArrayList<Integer> startFrame = new ArrayList<>();
+    private static ArrayList<Integer> endFrame = new ArrayList<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // Parse the input arguments:
@@ -125,12 +132,15 @@ public class VideoPlayer {
 
     // Builds the UI to show the video, the buttons, and indices.
     private static void buildUI() {
+        JPanel rightPanel = new JPanel();
+        
         // Create the outlayer of the UI:
         frame = new JFrame("Video Player");
         frame.setSize(new Dimension(900, 500)); // this can be changed
         GridBagLayout gLayout = new GridBagLayout();
         frame.getContentPane().setLayout(gLayout);
         GridBagConstraints c = new GridBagConstraints();
+        rightPanel.setLayout(gLayout);
 
         // Create the video panel, and place it in the UI:
         videoLabel = new JLabel();
@@ -139,7 +149,7 @@ public class VideoPlayer {
         c.anchor = GridBagConstraints.CENTER;
         c.gridx = 0;
         c.gridy = 0;
-        frame.getContentPane().add(videoLabel, c);
+        rightPanel.add(videoLabel, c);
 
         // Create three main buttons and add to UI:
         JButton playButton = new JButton("PLAY");
@@ -152,7 +162,12 @@ public class VideoPlayer {
         c.anchor = GridBagConstraints.CENTER;
         c.gridx = 0;
         c.gridy = 1;
-        frame.getContentPane().add(mainControlPanel, c);
+        rightPanel.add(mainControlPanel, c);
+        
+        c.fill = GridBagConstraints.VERTICAL;
+        c.gridx = 1;
+        c.gridy = 0;
+        frame.getContentPane().add(rightPanel, c);
 
         // Add action to the buttons:
         setPlayButtonAction(playButton);
@@ -162,12 +177,81 @@ public class VideoPlayer {
         // Left part of the UI can be added in here:
         // Just a suggestion, you can do whatever u like.
         // --------------------------------------------
+        int scenceNum = videoIndex.getSceneNum();
+        int shotNum = 0;
+        int subNum = 0;
+        
+        DefaultListModel<String> l1 = new DefaultListModel<>();
+        for(int i=0; i<scenceNum; i++){
+            l1.addElement("Scene "+(i+1));
+            SceneNode sc = videoIndex.getScene(i);
+            startFrame.add(sc.getStartFrame());
+            endFrame.add(sc.getEndFrame());
+            shotNum = sc.getShotsNum();
+            for(int j=0; j<shotNum; j++){
+                l1.addElement("\t\tShot "+(j+1));
+                ShotNode shot = sc.getShot(j);
+                startFrame.add(shot.getStartFrame());
+                endFrame.add(shot.getEndFrame());
+                subNum = shot.getSubshotsNum();
+                for(int k=0; k<subNum; k++){
+                    l1.addElement("\t\t\t\tSubshot "+(k+1));
+                    SubshotNode sub = shot.getSubshot(k);
+                    startFrame.add(sub.getStartFrame());
+                    endFrame.add(sub.getEndFrame());
+                }
+            }
+        }
 
+        JPanel leftPanel = new JPanel();
+        JList<String> sceneList = new JList<>(l1);
+        sceneList.setCellRenderer(new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList list,
+                    Object value, int index, boolean isSelected,
+                    boolean cellHasFocus) {
+
+                super.getListCellRendererComponent(list, value, index,
+                        isSelected, cellHasFocus);
+                if(currFrame >= startFrame.get(index) && currFrame <= endFrame.get(index)){
+                    setBackground(Color.RED);
+                }
+                return this;
+            }
+        });
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(sceneList);
+        sceneList.setLayoutOrientation(JList.VERTICAL);
+        scrollPane.setPreferredSize(new Dimension(100, 290));
+        leftPanel.add(scrollPane);
+        // scrollPane.setPreferredSize(new Dimension(100, 280));
+        c.fill = GridBagConstraints.VERTICAL;
+        c.gridx = 0;
+        c.gridy = 0;
+        frame.getContentPane().add(leftPanel, c);
+
+        setListAction(sceneList);
         // --------------------------------------------
 
+        frame.pack();
         // Set the JFrame as visible.
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    // Set the action for the list of scene
+    private static void setListAction(JList sceneList) {
+        sceneList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent evt) {
+                currFrame = startFrame.get(sceneList.getSelectedIndex());
+                audioClip.setMicrosecondPosition(getClipStartTime(currFrame));
+                if (!isPlaying) {
+                    videoLabel.setIcon(new ImageIcon(getFrameImage(currFrame)));
+                    frame.validate();
+                    frame.repaint();
+                }
+          }
+        });
     }
 
     // Set the action for the play button.
@@ -330,3 +414,4 @@ public class VideoPlayer {
     }
     // -----------------------------------------------------------------------------------
 }
+
