@@ -245,7 +245,6 @@ public class VideoPlayer {
         sceneList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent evt) {
                 if (!evt.getValueIsAdjusting()) {
-                    System.out.println("clicked "+ sceneList.getSelectedValue());
                     currFrame = startFrame.get(sceneList.getSelectedIndex());
                     audioClip.setMicrosecondPosition(getClipStartTime(currFrame));
                     if (!isPlaying) {
