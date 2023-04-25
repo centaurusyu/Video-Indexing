@@ -223,6 +223,7 @@ public class VideoPlayer {
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(sceneList);
         sceneList.setLayoutOrientation(JList.VERTICAL);
+        
         scrollPane.setPreferredSize(new Dimension(100, 290));
         leftPanel.add(scrollPane);
         // scrollPane.setPreferredSize(new Dimension(100, 280));
@@ -243,14 +244,17 @@ public class VideoPlayer {
     private static void setListAction(JList sceneList) {
         sceneList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent evt) {
-                currFrame = startFrame.get(sceneList.getSelectedIndex());
-                audioClip.setMicrosecondPosition(getClipStartTime(currFrame));
-                if (!isPlaying) {
-                    videoLabel.setIcon(new ImageIcon(getFrameImage(currFrame)));
-                    frame.validate();
-                    frame.repaint();
+                if (!evt.getValueIsAdjusting()) {
+                    System.out.println("clicked "+ sceneList.getSelectedValue());
+                    currFrame = startFrame.get(sceneList.getSelectedIndex());
+                    audioClip.setMicrosecondPosition(getClipStartTime(currFrame));
+                    if (!isPlaying) {
+                        videoLabel.setIcon(new ImageIcon(getFrameImage(currFrame)));
+                        frame.validate();
+                        frame.repaint();
+                    }
                 }
-          }
+            }
         });
     }
 
