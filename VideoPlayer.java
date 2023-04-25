@@ -220,13 +220,13 @@ public class VideoPlayer {
                 return this;
             }
         });
+
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(sceneList);
         sceneList.setLayoutOrientation(JList.VERTICAL);
-        
+        sceneList.clearSelection();
         scrollPane.setPreferredSize(new Dimension(100, 290));
         leftPanel.add(scrollPane);
-        // scrollPane.setPreferredSize(new Dimension(100, 280));
         c.fill = GridBagConstraints.VERTICAL;
         c.gridx = 0;
         c.gridy = 0;
@@ -244,7 +244,7 @@ public class VideoPlayer {
     private static void setListAction(JList sceneList) {
         sceneList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent evt) {
-                if (!evt.getValueIsAdjusting()) {
+                if (!evt.getValueIsAdjusting() && sceneList.getSelectedValue()!=null) {
                     currFrame = startFrame.get(sceneList.getSelectedIndex());
                     audioClip.setMicrosecondPosition(getClipStartTime(currFrame));
                     if (!isPlaying) {
@@ -252,6 +252,7 @@ public class VideoPlayer {
                         frame.validate();
                         frame.repaint();
                     }
+                    sceneList.clearSelection();
                 }
             }
         });
