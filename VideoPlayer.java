@@ -189,13 +189,13 @@ public class VideoPlayer {
             endFrame.add(sc.getEndFrame());
             shotNum = sc.getShotsNum();
             for(int j=0; j<shotNum; j++){
-                l1.addElement("\t\tShot "+(j+1));
+                l1.addElement("  Shot "+(j+1));
                 ShotNode shot = sc.getShot(j);
                 startFrame.add(shot.getStartFrame());
                 endFrame.add(shot.getEndFrame());
                 subNum = shot.getSubshotsNum();
                 for(int k=0; k<subNum; k++){
-                    l1.addElement("\t\t\t\tSubshot "+(k+1));
+                    l1.addElement("    Subshot "+(k+1));
                     SubshotNode sub = shot.getSubshot(k);
                     startFrame.add(sub.getStartFrame());
                     endFrame.add(sub.getEndFrame());
