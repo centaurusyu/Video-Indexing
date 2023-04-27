@@ -2,7 +2,9 @@ from moviepy.editor import *
 import numpy as np
 import pandas as pd
 import sys
+import time
 
+start_time = time.time()
 rgb_path = '../data/Ready_Player_One_rgb/InputVideo.rgb'
 audio_path = '../data/Ready_Player_One_rgb/InputAudio.wav'
 
@@ -50,7 +52,7 @@ from scenedetect import SceneManager,scene_manager,\
     open_video, ContentDetector,ThresholdDetector,AdaptiveDetector,StatsManager
 
 
-video_path = './test.mp4'
+video_path = './tmpdata/test.mp4'
 
 
 def adp_scene_detect(video_path,adp_threshold=3,min_scene_len=30):
@@ -109,3 +111,6 @@ with open('SceneList.txt', 'w') as f:
 with open('SceneShotList.txt', 'w') as f:
     for item in final_scene_shot_list:
         f.write("%s\n" % item)
+
+end_time = time.time()
+print('Time cost: ',end_time-start_time,'s')
