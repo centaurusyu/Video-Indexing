@@ -195,7 +195,7 @@ public class VideoPlayer {
                 endFrame.add(shot.getEndFrame());
                 subNum = shot.getSubshotsNum();
                 for (int k = 0; k < subNum; k++) {
-                    l1.addElement("         Subshot " + (k + 1));
+                    l1.addElement("            Subshot " + (k + 1));
                     SubshotNode sub = shot.getSubshot(k);
                     startFrame.add(sub.getStartFrame());
                     endFrame.add(sub.getEndFrame());
