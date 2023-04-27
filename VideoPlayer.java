@@ -133,7 +133,7 @@ public class VideoPlayer {
     // Builds the UI to show the video, the buttons, and indices.
     private static void buildUI() {
         JPanel rightPanel = new JPanel();
-        
+
         // Create the outlayer of the UI:
         frame = new JFrame("Video Player");
         frame.setSize(new Dimension(900, 500)); // this can be changed
@@ -163,7 +163,7 @@ public class VideoPlayer {
         c.gridx = 0;
         c.gridy = 1;
         rightPanel.add(mainControlPanel, c);
-        
+
         c.fill = GridBagConstraints.VERTICAL;
         c.gridx = 1;
         c.gridy = 0;
@@ -180,22 +180,22 @@ public class VideoPlayer {
         int scenceNum = videoIndex.getSceneNum();
         int shotNum = 0;
         int subNum = 0;
-        
+
         DefaultListModel<String> l1 = new DefaultListModel<>();
-        for(int i=0; i<scenceNum; i++){
-            l1.addElement("Scene "+(i+1));
+        for (int i = 0; i < scenceNum; i++) {
+            l1.addElement("Scene " + (i + 1));
             SceneNode sc = videoIndex.getScene(i);
             startFrame.add(sc.getStartFrame());
             endFrame.add(sc.getEndFrame());
             shotNum = sc.getShotsNum();
-            for(int j=0; j<shotNum; j++){
-                l1.addElement("  Shot "+(j+1));
+            for (int j = 0; j < shotNum; j++) {
+                l1.addElement("      Shot " + (j + 1));
                 ShotNode shot = sc.getShot(j);
                 startFrame.add(shot.getStartFrame());
                 endFrame.add(shot.getEndFrame());
                 subNum = shot.getSubshotsNum();
-                for(int k=0; k<subNum; k++){
-                    l1.addElement("    Subshot "+(k+1));
+                for (int k = 0; k < subNum; k++) {
+                    l1.addElement("         Subshot " + (k + 1));
                     SubshotNode sub = shot.getSubshot(k);
                     startFrame.add(sub.getStartFrame());
                     endFrame.add(sub.getEndFrame());
@@ -214,7 +214,7 @@ public class VideoPlayer {
 
                 super.getListCellRendererComponent(list, value, index,
                         isSelected, cellHasFocus);
-                if(currFrame >= startFrame.get(index) && currFrame <= endFrame.get(index)){
+                if (currFrame >= startFrame.get(index) && currFrame <= endFrame.get(index)) {
                     setBackground(Color.RED);
                 }
                 return this;
@@ -240,11 +240,12 @@ public class VideoPlayer {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+
     // Set the action for the list of scene
     private static void setListAction(JList sceneList) {
         sceneList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent evt) {
-                if (!evt.getValueIsAdjusting() && sceneList.getSelectedValue()!=null) {
+                if (!evt.getValueIsAdjusting() && sceneList.getSelectedValue() != null) {
                     currFrame = startFrame.get(sceneList.getSelectedIndex());
                     audioClip.setMicrosecondPosition(getClipStartTime(currFrame));
                     if (!isPlaying) {
@@ -418,4 +419,3 @@ public class VideoPlayer {
     }
     // -----------------------------------------------------------------------------------
 }
-
