@@ -107,10 +107,9 @@ remove_duplicate(final_scene_list, scene_interval)
 # final_scene_shot_list = list(final_scene_shot_list)
 # final_scene_shot_list.sort()
 
-# print('-'*50)
-# print('final_scene_list: ',final_scene_list)
-# print('-'*50)
-# print('final_scene_shot_list: ',final_scene_shot_list)
+print('-'*100)
+print('final_scene_list: \n',final_scene_list)
+
 
 with open('SceneList.txt', 'w') as f:
     for item in final_scene_list:
@@ -123,12 +122,14 @@ with open('SceneList.txt', 'w') as f:
 adp_shot_list = []
 con_shot_list = []
 
-def adp_shot_detect(video_path, end_time, frame_skip, adp_threshold=2,min_shot_len=15):
+def adp_shot_detect(video_path, end_time, frame_skip, adp_threshold=2.5,min_shot_len=15):
     video = open_video(video_path,framerate=30,backend='opencv')
     adp_shot_manager = SceneManager()
-    adp_shot_manager.add_detector(AdaptiveDetector(adp_threshold,min_shot_len))
-    adp_shot_manager.detect_scenes(video, end_time= 1000, frame_skip=10)
+    adp_shot_manager.add_detector(AdaptiveDetector(adp_threshold, min_shot_len))
+    adp_shot_manager.detect_scenes(video, end_time= end_time, frame_skip= frame_skip)
     adp_shot_list = adp_shot_manager.get_scene_list()
+    print(end_time,frame_skip)
+    print('adp_shot_list in method: \n',adp_shot_list)
     with open('./tmpdata/adp_shot.csv', 'w', encoding='utf-8') as f1:
         scene_manager.write_scene_list(f1,adp_shot_list, include_cut_list=True, cut_list=None)
 
@@ -137,8 +138,9 @@ def con_shot_detect(video_path, end_time, frame_skip, con_threshold=20,min_shot_
     video = open_video(video_path,framerate=30,backend='opencv')
     con_shot_manager = SceneManager()
     con_shot_manager.add_detector(ContentDetector(con_threshold, min_shot_len))
-    con_shot_manager.detect_scenes(video, end_time= 1000, frame_skip=10)
+    con_shot_manager.detect_scenes(video, end_time= end_time, frame_skip= frame_skip)
     con_shot_list = con_shot_manager.get_scene_list()
+    print('con_shot_list in method: \n',con_shot_list)
     with open('./tmpdata/con_shot.csv', 'w', encoding='utf-8') as f1:
         scene_manager.write_scene_list(f1,con_shot_list, include_cut_list=True, cut_list=None)
 
@@ -148,13 +150,15 @@ for idx in range(len(final_scene_list)):
     else:
         start_frame = final_scene_list[idx]
         end_frame = final_scene_list[idx+1]
-        adp_shot_detect(video_path, end_frame - 1, start_frame - 1)
-        con_shot_detect(video_path, end_frame - 1, start_frame - 1)
+        adp_shot_detect(video_path, end_time = end_frame - 1, frame_skip = start_frame)
+        con_shot_detect(video_path, end_time = end_frame - 1, frame_skip = start_frame)
         adp_shot = pd.read_csv('./tmpdata/adp_shot.csv',skiprows=1)
         con_shot = pd.read_csv('./tmpdata/con_shot.csv',skiprows=1)
-        adp_shot1 = adp['Start Frame'].values.tolist()
+        adp_shot1 = adp_shot['Start Frame'].values.tolist()
+        # print('-'*100)
+        # print('adp_shot1: \n',adp_shot1)
         adp_shot_list += adp_shot1
-        con_shot1 = con['Start Frame'].values.tolist()
+        con_shot1 = con_shot['Start Frame'].values.tolist()
         con_shot_list += con_shot1
 
 final_shot_list = set(adp_shot_list).intersection(set(con_shot_list))
@@ -162,10 +166,18 @@ final_shot_list = list(final_shot_list)
 final_shot_list.sort()
 remove_duplicate(final_shot_list, shot_interval)
 
+print('-'*100)
+print('adp_shot_list: \n',adp_shot_list)
+
+print('-'*100)
+print('con_shot_list: \n',con_shot_list)
+
 final_subshot_list = set(adp_shot_list).union(set(con_shot_list))
 final_subshot_list = list(final_subshot_list)
 final_subshot_list.sort()
 remove_duplicate(final_subshot_list, shot_interval)
+
+
 
 with open('ShotList.txt', 'w') as f:
     for item in final_shot_list:
