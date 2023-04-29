@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.awt.*;
 import java.awt.event.*;
@@ -136,7 +137,7 @@ public class VideoPlayer {
 
         // Create the outlayer of the UI:
         frame = new JFrame("Video Player");
-        frame.setSize(new Dimension(900, 500)); // this can be changed
+        frame.setSize(new Dimension(900, 800)); // this can be changed
         GridBagLayout gLayout = new GridBagLayout();
         frame.getContentPane().setLayout(gLayout);
         GridBagConstraints c = new GridBagConstraints();
@@ -225,7 +226,7 @@ public class VideoPlayer {
         scrollPane.setViewportView(sceneList);
         sceneList.setLayoutOrientation(JList.VERTICAL);
         sceneList.clearSelection();
-        scrollPane.setPreferredSize(new Dimension(100, 290));
+        scrollPane.setPreferredSize(new Dimension(200, 800));
         leftPanel.add(scrollPane);
         c.fill = GridBagConstraints.VERTICAL;
         c.gridx = 0;
@@ -391,31 +392,196 @@ public class VideoPlayer {
     // --- Shot 2: 6750 ~ 7799 frame (3:45 - 4:20)
     // --- Shot 3: 7800 ~ 8681 frame (4:20 - end of video clip)
 
-    private static void buildVideoIndex() {
-        // Dummy data insertion below:
-        // Scene 1:
-        videoIndex.addScene(0, 1799);
-        // --- Shot 1:
-        videoIndex.getScene(0).addShotNode(0, 899);
-        // -- Shot 2:
-        videoIndex.getScene(0).addShotNode(900, 1799);
+    // private static void buildVideoIndex() {
+    //     // Dummy data insertion below:
+    //     // Scene 1:
+    //     videoIndex.addScene(0, 1799);
+    //     // --- Shot 1:
+    //     videoIndex.getScene(0).addShotNode(0, 899);
+    //     // -- Shot 2:
+    //     videoIndex.getScene(0).addShotNode(900, 1799);
 
-        // Scene 2:
-        videoIndex.addScene(1800, 5399);
-        // --- Shot 1:
-        videoIndex.getScene(1).addShotNode(1800, 3599);
-        // === Subshot 1:
-        videoIndex.getScene(1).getShot(0).addSubshotNode(1800, 2699);
-        // === Subshot 2:
-        videoIndex.getScene(1).getShot(0).addSubshotNode(2700, 3599);
-        // --- Shot 2:
-        videoIndex.getScene(1).addShotNode(3600, 5399);
+    //     // Scene 2:
+    //     videoIndex.addScene(1800, 5399);
+    //     // --- Shot 1:
+    //     videoIndex.getScene(1).addShotNode(1800, 3599);
+    //     // === Subshot 1:
+    //     videoIndex.getScene(1).getShot(0).addSubshotNode(1800, 2699);
+    //     // === Subshot 2:
+    //     videoIndex.getScene(1).getShot(0).addSubshotNode(2700, 3599);
+    //     // --- Shot 2:
+    //     videoIndex.getScene(1).addShotNode(3600, 5399);
 
-        // Scene 3:
-        videoIndex.addScene(5400, 8681);
-        videoIndex.getScene(2).addShotNode(5400, 6749);
-        videoIndex.getScene(2).addShotNode(6750, 7799);
-        videoIndex.getScene(2).addShotNode(7800, 8681);
-    }
+    //     // Scene 3:
+    //     videoIndex.addScene(5400, 8681);
+    //     videoIndex.getScene(2).addShotNode(5400, 6749);
+    //     videoIndex.getScene(2).addShotNode(6750, 7799);
+    //     videoIndex.getScene(2).addShotNode(7800, 8681);
+    // }
     // -----------------------------------------------------------------------------------
+
+    //build video index based on the results in SceneList.txt, ShotList.txt, and ShotSubshotList.txt.
+    private static void buildVideoIndex(){
+        //read data from the SceneList.txt, ShotList.txt, and ShotSubshotList.txt and store the data in ArrayList.
+        String[] fileNames = new String[]{"SceneList.txt", "ShotList.txt", "ShotSubshotList.txt"};
+        ArrayList<Integer> sceneBreakPoints = readBreakPoints(fileNames[0]);
+        ArrayList<Integer> shotBreakPoints = readBreakPoints(fileNames[1]);
+        ArrayList<Integer> subshotBreakPoints = readBreakPoints(fileNames[2]);
+
+        removeNearbyPints(sceneBreakPoints, shotBreakPoints, subshotBreakPoints);
+        int indOfShotBrkPoint = 0;
+        int indOfSubshotBrkPoint = 0;
+        int indOfCurScene = 0;
+        int indOfCurShot = 0;
+        for(int i = 0; i < sceneBreakPoints.size()-1; i++){ 
+            //System.out.println(i+1);   
+            int sceneStart = sceneBreakPoints.get(i)+1;
+            int sceneEnd = sceneBreakPoints.get(i+1);
+            videoIndex.addScene(sceneStart, sceneEnd);
+
+            //System.out.println(sceneStart);
+
+
+            int shotStart = sceneStart;
+            int shotEnd = 0;
+            while(indOfShotBrkPoint < shotBreakPoints.size() && shotBreakPoints.get(indOfShotBrkPoint) < sceneEnd && shotBreakPoints.get(indOfShotBrkPoint) > sceneStart){
+
+                //System.out.println("  " + shotStart);
+
+                shotEnd = shotBreakPoints.get(indOfShotBrkPoint);
+                videoIndex.getScene(indOfCurScene).addShotNode(shotStart, shotEnd);
+
+                
+                // add subshot
+                int subShotStart = shotStart;
+                int subShotEnd = 0;
+                while(indOfSubshotBrkPoint < subshotBreakPoints.size() && subshotBreakPoints.get(indOfSubshotBrkPoint) < shotEnd && subshotBreakPoints.get(indOfSubshotBrkPoint) > shotStart){
+                    //System.out.println("    " + subShotStart);
+                    subShotEnd = subshotBreakPoints.get(indOfSubshotBrkPoint);
+                    videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, subShotEnd);
+
+                    subShotStart = subshotBreakPoints.get(indOfSubshotBrkPoint)+1;
+                    indOfSubshotBrkPoint++;
+                    //System.out.println("    " + subShotEnd);
+                }
+
+                if(subShotEnd != 0){
+                    videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, shotEnd);
+                    //System.out.println("    " + subShotStart);
+                    //System.out.println("    " + shotEnd);
+                }
+                // add subshot
+
+
+
+                shotStart = shotBreakPoints.get(indOfShotBrkPoint)+1;
+                indOfShotBrkPoint++;
+                indOfCurShot++;
+
+                //System.out.println("  " + shotEnd);
+            }
+
+            if(shotEnd != 0){
+                videoIndex.getScene(indOfCurScene).addShotNode(shotStart, sceneEnd);
+                //System.out.println("  " + shotStart);
+                // add subshot
+                int subShotStart = shotStart;
+                int subShotEnd = 0;
+                while(indOfSubshotBrkPoint < subshotBreakPoints.size() && subshotBreakPoints.get(indOfSubshotBrkPoint) < shotEnd && subshotBreakPoints.get(indOfSubshotBrkPoint) > shotStart){
+                    //System.out.println("    " + subShotStart);
+                    subShotEnd = subshotBreakPoints.get(indOfSubshotBrkPoint);
+                    videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, subShotEnd);
+    
+                    subShotStart = subshotBreakPoints.get(indOfSubshotBrkPoint);
+                    indOfSubshotBrkPoint++;
+                    //System.out.println("    " + subShotEnd);
+                }
+    
+                if(subShotEnd != 0){
+                    videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, shotEnd);
+                    //System.out.println("    " + subShotStart);
+                    //System.out.println("    " + shotEnd);
+                }
+                // add subshot
+                //System.out.println("  " + sceneEnd);
+            }
+            
+
+            indOfCurScene++;
+            indOfCurShot = 0;
+            //System.out.println(sceneEnd);
+        }
+
+    }
+
+    // Returns the ArrayList containing the data in fileName.
+    // @param: "fileName" is the name of file you want read.
+    private static ArrayList<Integer> readBreakPoints(String fileName){
+        ArrayList<Integer> breakPoints = new ArrayList<>();
+        try {
+            Scanner scanner = new Scanner(new File(fileName));
+            while(scanner.hasNextLine()){
+                breakPoints.add(Integer.parseInt(scanner.nextLine()));
+            }
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return breakPoints;
+    }
+
+    //remove the nearby points in the input arrays.
+    //Points are considered nearby if their Euclidean distance is less than 5.
+    /*
+    @param: "sceneBreakPoints" is the list contains break points of different scenes.
+    @param: "shotBreakPoints" is the list contains break points of different shot.
+    @param: "subshotBreakPoints" is the list contains break points of different subshot.
+    */
+    private static void removeNearbyPints(ArrayList<Integer> sceneBreakPoints, ArrayList<Integer> shotBreakPoints, ArrayList<Integer> subshotBreakPoints){
+        int threshold = 5;
+        //add the start point and end point for sceneBreakPoints
+        if(sceneBreakPoints.get(0) <= threshold){
+            sceneBreakPoints.set(0, 0);
+        }
+        else{
+            sceneBreakPoints.add(0, 0);
+        }
+
+        if(Math.abs(totalFrame - sceneBreakPoints.get(sceneBreakPoints.size()-1)) <= threshold){
+            sceneBreakPoints.set(sceneBreakPoints.size()-1, totalFrame);
+        }
+        else{
+            sceneBreakPoints.add(totalFrame);
+        }
+
+        // remove the nearby points in shotBreakPoints and subshotBreakPoints
+        for(int num : sceneBreakPoints){
+            for(int i = 0; i < shotBreakPoints.size(); i++){
+                if(Math.abs(num - shotBreakPoints.get(i)) <= threshold){
+                    shotBreakPoints.remove(i);
+                    break;
+                }
+            }
+        }
+
+        for(int num : sceneBreakPoints){
+            for(int i = 0; i < subshotBreakPoints.size(); i++){
+                if(Math.abs(num - subshotBreakPoints.get(i)) <= threshold){
+                    subshotBreakPoints.remove(i);
+                    break;
+                }
+            }
+        }
+
+        for(int num : shotBreakPoints){
+            for(int i = 0; i < subshotBreakPoints.size(); i++){
+                if(Math.abs(num - subshotBreakPoints.get(i)) <= threshold){
+                    subshotBreakPoints.remove(i);
+                    break;
+                }
+            }
+        }
+
+    }
 }

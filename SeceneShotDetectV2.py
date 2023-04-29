@@ -5,8 +5,8 @@ import sys
 import time
 
 start_time = time.time()
-rgb_path = '../data/Ready_Player_One_rgb/InputVideo.rgb'
-audio_path = '../data/Ready_Player_One_rgb/InputAudio.wav'
+rgb_path = sys.argv[1]
+audio_path = sys.argv[2]
 scene_interval = 30
 shot_interval = 15
 
