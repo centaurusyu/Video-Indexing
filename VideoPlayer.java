@@ -368,20 +368,14 @@ public class VideoPlayer {
         return f * 1000000L / FPS;
     }
 
-<<<<<<< Updated upstream
+
     // Builds video index based on the results in SceneList.txt, ShotList.txt, and
     // ShotSubshotList.txt.
     private static void buildVideoIndex() {
         // read data from the SceneList.txt, ShotList.txt, and ShotSubshotList.txt and
         // store the data in ArrayList.
         String[] fileNames = new String[] { "SceneList.txt", "ShotList.txt", "ShotSubshotList.txt" };
-=======
 
-    //build video index based on the results in SceneList.txt, ShotList.txt, and ShotSubshotList.txt.
-    private static void buildVideoIndex(){
-        //read data from the SceneList.txt, ShotList.txt, and ShotSubshotList.txt and store the data in ArrayList.
-        String[] fileNames = new String[]{"SceneList.txt", "ShotList.txt", "ShotSubshotList.txt"};
->>>>>>> Stashed changes
         ArrayList<Integer> sceneBreakPoints = readBreakPoints(fileNames[0]);
         ArrayList<Integer> shotBreakPoints = readBreakPoints(fileNames[1]);
         ArrayList<Integer> subshotBreakPoints = readBreakPoints(fileNames[2]);
@@ -391,7 +385,7 @@ public class VideoPlayer {
         int indOfSubshotBrkPoint = 0;
         int indOfCurScene = 0;
         int indOfCurShot = 0;
-<<<<<<< Updated upstream
+
         for (int i = 0; i < sceneBreakPoints.size() - 1; i++) {
             int sceneStart = sceneBreakPoints.get(i) + 1;
             int sceneEnd = sceneBreakPoints.get(i + 1);
@@ -401,19 +395,7 @@ public class VideoPlayer {
             int shotEnd = 0;
             while (indOfShotBrkPoint < shotBreakPoints.size() && shotBreakPoints.get(indOfShotBrkPoint) < sceneEnd
                     && shotBreakPoints.get(indOfShotBrkPoint) > sceneStart) {
-=======
-        for(int i = 0; i < sceneBreakPoints.size()-1; i++){ 
-            int sceneStart = sceneBreakPoints.get(i)+1;
-            int sceneEnd = sceneBreakPoints.get(i+1);
-            videoIndex.addScene(sceneStart, sceneEnd);
 
-
-
-            int shotStart = sceneStart;
-            int shotEnd = 0;
-            while(indOfShotBrkPoint < shotBreakPoints.size() && shotBreakPoints.get(indOfShotBrkPoint) < sceneEnd && shotBreakPoints.get(indOfShotBrkPoint) > sceneStart){
-
->>>>>>> Stashed changes
 
                 shotEnd = shotBreakPoints.get(indOfShotBrkPoint);
                 videoIndex.getScene(indOfCurScene).addShotNode(shotStart, shotEnd);
@@ -421,13 +403,9 @@ public class VideoPlayer {
                 // add subshot
                 int subShotStart = shotStart;
                 int subShotEnd = 0;
-<<<<<<< Updated upstream
-                while (indOfSubshotBrkPoint < subshotBreakPoints.size()
-                        && subshotBreakPoints.get(indOfSubshotBrkPoint) < shotEnd
-                        && subshotBreakPoints.get(indOfSubshotBrkPoint) > shotStart) {
-=======
+
                 while(indOfSubshotBrkPoint < subshotBreakPoints.size() && subshotBreakPoints.get(indOfSubshotBrkPoint) < shotEnd && subshotBreakPoints.get(indOfSubshotBrkPoint) > shotStart){
->>>>>>> Stashed changes
+
                     subShotEnd = subshotBreakPoints.get(indOfSubshotBrkPoint);
                     videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, subShotEnd);
 
@@ -450,31 +428,21 @@ public class VideoPlayer {
                 // add subshot
                 int subShotStart = shotStart;
                 int subShotEnd = 0;
-<<<<<<< Updated upstream
                 while (indOfSubshotBrkPoint < subshotBreakPoints.size()
                         && subshotBreakPoints.get(indOfSubshotBrkPoint) < shotEnd
                         && subshotBreakPoints.get(indOfSubshotBrkPoint) > shotStart) {
-=======
-                while(indOfSubshotBrkPoint < subshotBreakPoints.size() && subshotBreakPoints.get(indOfSubshotBrkPoint) < shotEnd && subshotBreakPoints.get(indOfSubshotBrkPoint) > shotStart){
->>>>>>> Stashed changes
+
                     subShotEnd = subshotBreakPoints.get(indOfSubshotBrkPoint);
                     videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, subShotEnd);
 
                     subShotStart = subshotBreakPoints.get(indOfSubshotBrkPoint);
                     indOfSubshotBrkPoint++;
                 }
-<<<<<<< Updated upstream
-
-                if (subShotEnd != 0) {
-                    videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, shotEnd);
-                }
-=======
     
                 if(subShotEnd != 0){
                     videoIndex.getScene(indOfCurScene).getShot(indOfCurShot).addSubshotNode(subShotStart, shotEnd);
                 }
                 // add subshot
->>>>>>> Stashed changes
             }
             indOfCurScene++;
             indOfCurShot = 0;
