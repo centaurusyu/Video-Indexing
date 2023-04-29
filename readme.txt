@@ -31,8 +31,26 @@
 		- resolution: 480x270
 		- number of frame: 5686
 
-3. How to run the whole project on windows
-	(1) replace "C:\ProgramData\anaconda3\python.exe" in line 5 with your own path
+3. Python environment installation
+	(1) Use anaconda to manage the virtual environments
+	(2) run 'conda create -n 576Project python=3.10' to create a virtual environment
+	(3) run 'conda activate 576Project' to switch to the virtual environment
+	(4) install packages:
+		conda config --add channels conda-forge
+		conda install pandas=1.5.3
+		conda install -c conda-forge moviepy=1.0.3
+		pip install opencv-python
+		pip install scenedetect[opencv] --upgrade
+	(5) locate the interpreter of new environment
+	    use the command
+			python -c "import sys; print(sys.executable)"
+
+		example result:
+			(576Project) D:\576project\Video-Indexing> python -c "import sys; print(sys.executable)"
+			D:\anaconda\envs\576Project\python.exe
+
+4. How to run the whole project on windows
+	(1) replace "C:\ProgramData\anaconda3\python.exe" in line 5 with interpreter path from 3
 	(2) open windows cmd
 	(3) cd to the directory of the project
 	(4) type "runPlayer.bat inputVideo inputAudio"
