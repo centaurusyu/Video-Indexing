@@ -32,8 +32,9 @@
 		- number of frame: 5686
 
 3. How to run the whole project on windows
-	(1) open windows cmd
-	(2) cd to the directory of the project
-	(3) type "runPlayer.bat inputVideo inputAudio"
+	(1) replace "C:\ProgramData\anaconda3\python.exe" in line 5 with your own path
+	(2) open windows cmd
+	(3) cd to the directory of the project
+	(4) type "runPlayer.bat inputVideo inputAudio"
 		- inputVideo is the video file's path
 		- inputAudio is the audio file's path
