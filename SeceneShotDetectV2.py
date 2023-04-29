@@ -7,8 +7,16 @@ import time
 start_time = time.time()
 rgb_path = sys.argv[1]
 audio_path = sys.argv[2]
+
+# parameters
 scene_interval = 30
+adp_scene_detect_threshold = 3
+con_scene_detect_threshold = 30.0
+
 shot_interval = 15
+adp_shot_detect_threshold = 2.5
+con_shot_detect_threshold = 20
+# parameters
 
 if len(sys.argv) == 3:
     rgb_path = sys.argv[1]
@@ -82,7 +90,7 @@ def adp_scene_detect(video_path,adp_threshold=3,min_scene_len=30):
             include_cut_list=True, cut_list=None)
         # scene_manager.write_scene_list_html('./adp.html', adp_scene_list)
 
-adp_scene_detect(video_path,adp_threshold=3,min_scene_len=scene_interval)
+adp_scene_detect(video_path,adp_threshold=adp_scene_detect_threshold,min_scene_len=scene_interval)
 
 def con_scene_detect(video_path,con_threshold=36.0,min_scene_len=30):
     video = open_video(video_path,framerate=30,backend='opencv')
@@ -98,7 +106,7 @@ def con_scene_detect(video_path,con_threshold=36.0,min_scene_len=30):
             include_cut_list=True, cut_list=None)
         # scene_manager.write_scene_list_html('./con.html', con_scene_list)
 
-con_scene_detect(video_path,con_threshold=30.0,
+con_scene_detect(video_path,con_threshold=con_scene_detect_threshold,
                  min_scene_len=scene_interval)
 
 ############################################################
@@ -158,7 +166,7 @@ con_shot_list = []
 
 
 
-def adp_shot_detect(video_path,  adp_threshold=2.5,min_shot_len=15):
+def adp_shot_detect(video_path,  adp_threshold=2.5, min_shot_len=15):
     video = open_video(video_path,framerate=30,backend='opencv')
     adp_shot_manager = SceneManager()
     adp_shot_manager.add_detector(AdaptiveDetector(adp_threshold, min_shot_len))
@@ -169,7 +177,7 @@ def adp_shot_detect(video_path,  adp_threshold=2.5,min_shot_len=15):
         scene_manager.write_scene_list(f1,adp_shot_list, include_cut_list=True, cut_list=None)
 
 
-def con_shot_detect(video_path, con_threshold=20,min_shot_len=15):
+def con_shot_detect(video_path, con_threshold=20, min_shot_len=15):
     video = open_video(video_path,framerate=30,backend='opencv')
     con_shot_manager = SceneManager()
     con_shot_manager.add_detector(ContentDetector(con_threshold, min_shot_len))
@@ -182,8 +190,8 @@ def con_shot_detect(video_path, con_threshold=20,min_shot_len=15):
 
 for idx in range(len(final_scene_list)):
     shot_video_path = './tmpdata/tmp' + '{:03d}'.format(idx + 1) + '.mp4'
-    adp_shot_detect(shot_video_path)
-    con_shot_detect(shot_video_path)    
+    adp_shot_detect(shot_video_path, adp_shot_detect_threshold, shot_interval)
+    con_shot_detect(shot_video_path, con_shot_detect_threshold, shot_interval)    
 
     adp_shot = pd.read_csv('./tmpdata/adp_shot.csv',skiprows=1)
     con_shot = pd.read_csv('./tmpdata/con_shot.csv',skiprows=1)
