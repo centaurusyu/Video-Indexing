@@ -15,6 +15,7 @@
 *.wav
 *.mp4
 *.csv
+*.json
 
 ./tmpdata
 
