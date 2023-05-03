@@ -2,7 +2,7 @@
 
 
 REM call python program
-C:\ProgramData\anaconda3\python.exe SeceneShotDetectV2.py %1 %2
+C:\ProgramData\anaconda3\python.exe SeceneShotDetect.py %1 %2
 
 REM wait for python finishing
 if %errorlevel% neq 0 (
@@ -20,4 +20,5 @@ REM remove temp txts and temp directory
 del .\ShotList.txt
 del .\SceneList.txt
 del .\ShotSubshotList.txt
+del .\*.class
 rmdir .\tmpdata /s /q

@@ -1,0 +1,48 @@
+优先保证scene和shot分割正确
+其次subshot
+
+
+1. 1号很好，2号3号基本都是scene
+scene_interval = 30
+adp_scene_detect_threshold = 3
+con_scene_detect_threshold = 30.0
+
+shot_interval = 15
+adp_shot_detect_threshold = 2.5
+con_shot_detect_threshold = 20
+
+2. 1号有subshot， 2号3号有shot，但是没有subshot
+scene_interval = 60
+adp_scene_detect_threshold = 3
+con_scene_detect_threshold = 30.0
+
+shot_interval = 15
+adp_shot_detect_threshold = 0.5
+con_shot_detect_threshold = 25
+
+3. 1,3 有subshot，但是分类效果不好
+scene_interval = 150
+adp_scene_detect_threshold = 3
+con_scene_detect_threshold = 30.0
+
+shot_interval = 50
+adp_shot_detect_threshold = 4
+con_shot_detect_threshold = 12.5
+
+4. 比3稍微好一点？最后的挣扎
+scene_interval = 60
+adp_scene_detect_threshold = 3
+con_scene_detect_threshold = 30.0
+
+shot_interval = 30
+adp_shot_detect_threshold = 3
+con_shot_detect_threshold = 10
+
+5.只用一个detector
+scene_interval = 30
+adp_scene_detect_threshold = 1.5
+con_scene_detect_threshold = 10
+
+shot_interval = 15
+adp_shot_detect_threshold = 2.5
+con_shot_detect_threshold = 20
